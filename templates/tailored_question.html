@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tailored interview question · Interview Practice Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page narrow">
+    <header class="hero">
+      <p class="eyebrow">{{ target_role }} · {{ topic }} · {{ difficulty }}</p>
+      <h1>Your tailored question</h1>
+      <p class="muted">Question source: {{ question_source }}</p>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="notice {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <section class="card">
+      <p class="eyebrow">INTERVIEW QUESTION</p>
+      <h2>{{ question }}</h2>
+      <form method="post" action="{{ url_for('submit_tailored_answer') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="answer">Your answer</label>
+        <textarea id="answer" name="answer" rows="8" maxlength="8000" placeholder="Write your answer here..." required></textarea>
+        <button type="submit">Submit answer and get feedback</button>
+      </form>
+    </section>
+    <a class="text-link" href="{{ url_for('home', topic=topic, difficulty=difficulty) }}">Back to practice</a>
+  </main>
+</body>
+</html>

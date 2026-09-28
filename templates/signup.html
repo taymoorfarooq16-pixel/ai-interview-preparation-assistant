@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create an account · Interview Practice Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page narrow">
+    <header class="hero">
+      <p class="eyebrow">PLACEMENT PRACTICE</p>
+      <h1>Create your account</h1>
+      <p>Sign up to keep your interview practice history private to your account.</p>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="notice {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <section class="card">
+      <form method="post" action="{{ url_for('signup') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" required>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+        <button type="submit">Create account</button>
+      </form>
+      <p class="muted account-switch">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+    </section>
+  </main>
+</body>
+</html>

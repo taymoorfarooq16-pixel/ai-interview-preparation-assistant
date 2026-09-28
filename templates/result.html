@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your practice feedback</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page narrow">
+    <header class="hero">
+      <p class="eyebrow">ANSWER SAVED · {{ topic }} · {{ difficulty }}{% if target_role %} · {{ target_role }}{% endif %}</p>
+      <h1>Your practice feedback</h1>
+      <div class="account-bar">
+        <span>Signed in as <strong>{{ session['username'] }}</strong></span>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="small-button secondary" type="submit">Log out</button>
+        </form>
+      </div>
+    </header>
+    <section class="card">
+      <p class="eyebrow">QUESTION</p>
+      <h2>{{ question }}</h2>
+      <p class="eyebrow">YOUR ANSWER</p>
+      <p class="answer">{{ answer }}</p>
+      <div class="feedback">
+        <p class="eyebrow">{{ feedback_source|upper }}</p>
+        <p>{{ feedback }}</p>
+      </div>
+      {% if score is not none %}
+      <p class="score-note"><strong>AI practice score: {{ score }}/10</strong> <span>Use this as practice guidance.</span></p>
+      {% endif %}
+      {% if mock_next_url %}
+      <a class="button" href="{{ mock_next_url }}">{{ mock_next_label }}</a>
+      {% else %}
+      <a class="button" href="{{ url_for('home', topic=topic) }}">Practice another question</a>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request could not be verified</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page narrow">
+    <section class="card">
+      <p class="eyebrow">FORM SECURITY</p>
+      <h1>Refresh and try again</h1>
+      <p>{{ message }}</p>
+      <a class="button" href="{{ url_for('home') }}">Back to practice</a>
+    </section>
+  </main>
+</body>
+</html>

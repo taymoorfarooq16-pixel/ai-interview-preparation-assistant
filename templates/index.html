@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interview Practice Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">YOUR PLACEMENT PRACTICE SPACE</p>
+      <h1>Interview Practice Assistant</h1>
+      <p>Choose a topic, answer a question, and build your confidence one practice session at a time.</p>
+      <div class="account-bar">
+        <span>Signed in as <strong>{{ session['username'] }}</strong></span>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="small-button secondary" type="submit">Log out</button>
+        </form>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="notice {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <section class="card">
+      <form method="get" action="{{ url_for('home') }}" class="topic-form">
+        <label for="topic">Choose a topic</label>
+        <select id="topic" name="topic" onchange="this.form.submit()">
+          {% for topic in topics %}
+          <option value="{{ topic }}" {% if topic == selected_topic %}selected{% endif %}>{{ topic }}</option>
+          {% endfor %}
+        </select>
+        <label for="difficulty">Choose difficulty</label>
+        <select id="difficulty" name="difficulty" onchange="this.form.submit()">
+          {% for difficulty in difficulties %}
+          <option value="{{ difficulty }}" {% if difficulty == selected_difficulty %}selected{% endif %}>{{ difficulty }}</option>
+          {% endfor %}
+        </select>
+      </form>
+
+      <p class="eyebrow">{{ selected_difficulty|upper }} PRACTICE QUESTION</p>
+      <h2>{{ question }}</h2>
+      <form method="post" action="{{ url_for('submit_answer') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="topic" value="{{ selected_topic }}">
+        <input type="hidden" name="difficulty" value="{{ selected_difficulty }}">
+        <input type="hidden" name="question" value="{{ question }}">
+        <label for="answer">Your answer</label>
+        <textarea id="answer" name="answer" rows="7" placeholder="Write your answer here..." required></textarea>
+        <div class="button-row">
+          <button type="submit">Submit answer</button>
+          <a class="button secondary" href="{{ url_for('next_question', topic=selected_topic, difficulty=selected_difficulty, number=question_number) }}">Next question</a>
+        </div>
+      </form>
+      <form method="post" action="{{ url_for('start_mock_interview') }}" class="mock-start">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="topic" value="{{ selected_topic }}">
+        <input type="hidden" name="difficulty" value="{{ selected_difficulty }}">
+        <button class="secondary" type="submit">Start a 3-question mock interview</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">RECENT PRACTICE</p>
+      <h2>Your last five answers</h2>
+      {% if sessions %}
+        <ul class="history">
+          {% for session in sessions %}
+          <li>
+            <span class="tag">{{ session['topic'] }}</span>
+            {% if session['difficulty'] %}<span class="tag">{{ session['difficulty'] }}</span>{% endif %}
+            <strong>{{ session['question'] }}</strong>
+            <p>{{ session['answer'][:180] }}{% if session['answer']|length > 180 %}…{% endif %}</p>
+            <small>{{ session['created_at'] }}</small>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Your submitted answers will appear here.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">PRACTICE FOR A SPECIFIC JOB</p>
+      <h2>Generate a role-tailored question</h2>
+      <p class="muted">Enter a target role and optionally paste a job description. The app will use your selected topic and difficulty.</p>
+      <form method="post" action="{{ url_for('tailored_question') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="topic" value="{{ selected_topic }}">
+        <input type="hidden" name="difficulty" value="{{ selected_difficulty }}">
+        <label for="target_role">Target role</label>
+        <input id="target_role" name="target_role" type="text" maxlength="100" placeholder="For example: Python Developer Intern" required>
+        <label for="job_description">Job description (optional, up to 4,000 characters)</label>
+        <textarea id="job_description" name="job_description" rows="5" maxlength="4000" placeholder="Paste the responsibilities or skills from the job posting..."></textarea>
+        <button type="submit">Generate tailored question</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">PRACTICE FROM YOUR RESUME</p>
+      <h2>Generate a question from your experience</h2>
+      <p class="muted">Upload a text-based PDF resume. The PDF is processed in memory and is not saved. Its extracted text is sent to Gemini to generate a question.</p>
+      <form method="post" action="{{ url_for('resume_question') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="topic" value="{{ selected_topic }}">
+        <input type="hidden" name="difficulty" value="{{ selected_difficulty }}">
+        <label for="resume_target_role">Target role</label>
+        <input id="resume_target_role" name="target_role" type="text" maxlength="100" placeholder="For example: Software Engineer Intern" required>
+        <label for="resume">Resume PDF (maximum 2 MB and 6 pages)</label>
+        <input id="resume" name="resume" type="file" accept="application/pdf,.pdf" required>
+        <label class="consent-label"><input type="checkbox" name="resume_consent" value="yes" required> I agree to send the extracted resume text to Gemini to generate a practice question.</label>
+        <button type="submit">Generate question from resume</button>
+      </form>
+    </section>
+    <footer>AI questions and feedback depend on Gemini availability; fallback questions and feedback are provided when needed.</footer>
+  </main>
+</body>
+</html>

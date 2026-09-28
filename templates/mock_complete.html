@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mock interview complete · Interview Practice Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page narrow">
+    <header class="hero">
+      <p class="eyebrow">MOCK INTERVIEW COMPLETE</p>
+      <h1>Well done, {{ session['username'] }}.</h1>
+      <p>You answered {{ answers|length }} questions in {{ interview['topic'] }} at {{ interview['difficulty'] }} level.</p>
+    </header>
+    <section class="card">
+      <p class="eyebrow">SESSION SUMMARY</p>
+      <ul class="history">
+        {% for item in answers %}
+        <li>
+          <strong>{{ loop.index }}. {{ item['question'] }}</strong>
+          {% if item['score'] is not none %}<span class="tag score-tag">AI practice score: {{ item['score'] }}/10</span>{% endif %}
+          <p>{{ item['answer'] }}</p>
+          <div class="feedback compact-feedback">
+            <p class="eyebrow">{{ item['feedback_source']|upper }}</p>
+            <p>{{ item['feedback'] }}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="button-row">
+        <a class="button" href="{{ url_for('dashboard') }}">View dashboard</a>
+        <a class="button secondary" href="{{ url_for('home') }}">Practice more</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

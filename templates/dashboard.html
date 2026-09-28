@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Progress dashboard · Interview Practice Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">YOUR PLACEMENT PRACTICE</p>
+      <h1>Progress dashboard</h1>
+      <div class="account-bar">
+        <span>Signed in as <strong>{{ session['username'] }}</strong></span>
+        <a href="{{ url_for('home') }}">Back to practice</a>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="small-button secondary" type="submit">Log out</button>
+        </form>
+      </div>
+    </header>
+
+    <section class="stats-grid" aria-label="Practice totals">
+      <article class="stat-card">
+        <p class="eyebrow">ANSWERS PRACTICED</p>
+        <strong>{{ totals['answer_count'] or 0 }}</strong>
+      </article>
+      <article class="stat-card">
+        <p class="eyebrow">TOPICS PRACTICED</p>
+        <strong>{{ totals['topic_count'] or 0 }}</strong>
+      </article>
+      <article class="stat-card">
+        <p class="eyebrow">AI REVIEWS</p>
+        <strong>{{ totals['ai_count'] or 0 }}</strong>
+      </article>
+      <article class="stat-card">
+        <p class="eyebrow">AVERAGE AI SCORE</p>
+        <strong>{% if totals['average_score'] is not none %}{{ totals['average_score']|round(1) }}/10{% else %}—{% endif %}</strong>
+      </article>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">PRACTICE BY TOPIC</p>
+      <h2>Where you’ve spent your practice time</h2>
+      {% if topic_stats %}
+        <ul class="topic-bars">
+          {% for item in topic_stats %}
+          <li>
+            <div class="bar-label"><strong>{{ item['topic'] }}</strong><span>{{ item['answer_count'] }} answers</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width: {{ (item['answer_count'] / largest_topic_count * 100)|round|int }}%"></div></div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Submit your first practice answer to start tracking progress.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">RECENT ANSWERS</p>
+      <h2>Your latest practice sessions</h2>
+      {% if recent_sessions %}
+        <ul class="history">
+          {% for item in recent_sessions %}
+          <li>
+            <span class="tag">{{ item['topic'] }}</span>
+            {% if item['difficulty'] %}<span class="tag">{{ item['difficulty'] }}</span>{% endif %}
+            {% if item['target_role'] %}<span class="tag">{{ item['target_role'] }}</span>{% endif %}
+            {% if item['score'] is not none %}<span class="tag score-tag">AI practice score: {{ item['score'] }}/10</span>{% endif %}
+            <strong>{{ item['question'] }}</strong>
+            <p>{{ item['answer'][:180] }}{% if item['answer']|length > 180 %}…{% endif %}</p>
+            {% if item['feedback'] %}<p class="muted"><strong>{{ item['feedback_source'] }}:</strong> {{ item['feedback'][:240] }}{% if item['feedback']|length > 240 %}…{% endif %}</p>{% endif %}
+            <small>{{ item['created_at'] }}</small>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Your saved answers will appear here.</p>
+      {% endif %}
+      <a class="button" href="{{ url_for('home') }}">Practice now</a>
+    </section>
+  </main>
+</body>
+</html>
