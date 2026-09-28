@@ -74,7 +74,9 @@ class PostgresConnection:
             self.connection.close()
 
     def execute(self, sql, parameters=()):
-        sql = sql.replace("?", "%s")
+        # Psycopg treats percent signs in parameterized SQL as placeholders too.
+        # Escape literal percent signs first, then translate SQLite-style ? marks.
+        sql = sql.replace("%", "%%").replace("?", "%s")
         if sql.lstrip().upper().startswith("INSERT INTO") and "RETURNING" not in sql.upper():
             cursor = self.connection.execute(sql.rstrip().rstrip(";") + " RETURNING id", parameters)
             inserted_row = cursor.fetchone()
