@@ -295,11 +295,11 @@ This is only a practice estimate. Do not claim the answer is correct if it conta
         from google import genai
 
         client = genai.Client(api_key=api_key)
-        response = client.interactions.create(
+        response = client.models.generate_content(
             model="gemini-3.8-flash",
-            input=prompt,
+            contents=prompt,
         )
-        feedback = (response.output_text or "").strip()
+        feedback = (response.text or "").strip()
         if not feedback:
             raise ValueError("The AI service returned an empty response.")
         score_match = re.search(r"(?im)^\s*(?:practice\s+)?score\s*:\s*(10|[0-9])\s*/\s*10\b", feedback)
@@ -309,6 +309,7 @@ This is only a practice estimate. Do not claim the answer is correct if it conta
         # Log the failure type and a redacted message to the VS Code terminal.
         # Never print the API key, even if an SDK error accidentally contains it.
         safe_error = str(error).replace(api_key, "[REDACTED API KEY]")
+        safe_error = safe_error.encode("ascii", "backslashreplace").decode("ascii")
         app.logger.error("Gemini feedback failed (%s): %s", type(error).__name__, safe_error)
         return (
             "The AI service could not be reached, so basic feedback is shown instead. "
@@ -339,13 +340,17 @@ Difficulty: {difficulty}
         from google import genai
 
         client = genai.Client(api_key=api_key)
-        response = client.interactions.create(model="gemini-3.8-flash", input=prompt)
-        question = (response.output_text or "").strip().strip('"“”')
+        response = client.models.generate_content(
+            model="gemini-3.8-flash",
+            contents=prompt,
+        )
+        question = (response.text or "").strip().strip('"“”')
         if not question or len(question) > 500:
             raise ValueError("The AI returned an empty or overly long question.")
         return question, "AI-generated question · Gemini"
     except Exception as error:
         safe_error = str(error).replace(api_key, "[REDACTED API KEY]")
+        safe_error = safe_error.encode("ascii", "backslashreplace").decode("ascii")
         app.logger.error("Tailored question failed (%s): %s", type(error).__name__, safe_error)
         return random.choice(QUESTION_BANK[topic][difficulty]), "Question bank (AI unavailable)"
 
